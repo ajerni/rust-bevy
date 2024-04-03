@@ -5,7 +5,7 @@ pub struct MyTimer(pub Timer);
 
 impl MyTimer {
     pub fn new() -> Self {
-        Self(Timer::from_seconds(1.0, TimerMode::Once))
+        Self(Timer::from_seconds(0.2, TimerMode::Once))
     }
 }
 

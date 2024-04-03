@@ -2,6 +2,7 @@ mod controls;
 mod fly_plugin;
 mod gamestate;
 mod particle;
+mod paused;
 mod schnecke;
 mod scoreboard;
 mod texts;
@@ -9,10 +10,11 @@ mod timers;
 
 use bevy_mod_picking::events::{Click, Drag, Move, Pointer};
 use bevy_mod_picking::prelude::On;
-use bevy_mod_picking::{DefaultPickingPlugins, PickableBundle};
+use bevy_mod_picking::DefaultPickingPlugins;
 
 use crate::gamestate::*;
 use crate::particle::*;
+use crate::paused::*;
 use crate::schnecke::*;
 use crate::scoreboard::*;
 use bevy_enoki::prelude::*;
@@ -31,12 +33,6 @@ pub struct Rotator {
     speed: f32,
 }
 
-// impl Default for Rotator {
-//     fn default() -> Self {
-//         Self { speed: 100.0 }
-//     }
-// }
-
 fn main() {
     App::new()
         .insert_resource(AnimationStateResource { moving: false })
@@ -45,22 +41,26 @@ fn main() {
             score: 0,
             highscore: 0,
         })
-        .init_resource::<MyTimer>()
+        .insert_resource(RapierConfiguration {
+            gravity: Vec2::ZERO,
+            physics_pipeline_active: true,
+            force_update_from_transform_changes: true,
+            ..default()
+        })
+        .init_resource::<MyTimer>() // init initializes with Default value
         .init_state::<GameState>()
         .init_state::<SchneckenEmitterState>()
         .add_plugins(DefaultPlugins)
-        .add_plugins(DefaultPickingPlugins)
-        .add_plugins((ClickDetectorPlugin, MyTextPlugin, FlyPlugin))
+        .add_plugins(DefaultPickingPlugins) // for drag&drop and hover(move)
+        .add_plugins((ClickDetectorPlugin, MyTextPlugin, FlyPlugin, PausePlugin))
         .add_plugins(EnokiPlugin) //for particle emmitters
+        //.add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_systems(Startup, (setup_system, setup_ship_and_maus))
         .add_systems(
             PostStartup,
             (spawn_image_button_and_scoreboard, spawn_highscore),
         )
-        // .add_systems(
-        //     FixedUpdate,
-        //     spawn_schnecke_emitter.run_if(in_state(SchneckenEmitterState::Emitting)),
-        // )
         .add_systems(
             OnEnter(SchneckenEmitterState::Emitting),
             spawn_schnecke_emitter,
@@ -76,17 +76,14 @@ fn main() {
                 update_scoreboard,
                 update_highscore,
                 check_score_changed,
-            ),
+            )
+                .chain()
+                .run_if(in_state(GameState::Playing)),
         )
-        .add_systems(FixedUpdate, rotate_system)
-        //.add_plugins(RapierDebugRenderPlugin::default())
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .insert_resource(RapierConfiguration {
-            gravity: Vec2::ZERO,
-            physics_pipeline_active: true,
-            force_update_from_transform_changes: true,
-            ..default()
-        })
+        .add_systems(
+            FixedUpdate,
+            rotate_system.run_if(in_state(GameState::Playing)),
+        )
         .add_systems(
             FixedUpdate,
             color_change_system.run_if(on_timer(std::time::Duration::from_secs(2))),
@@ -114,19 +111,18 @@ fn setup_system(
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, 0.0),
                 rotation: Quat::from_rotation_y(45.0),
-                scale: Vec3::new(3.0, 2.0, 1.0),
+                scale: Vec3::new(2.5, 2.0, 1.0),
             },
             ..default()
         })
         .insert(Rotator { speed: 1.5 })
         .insert(Cubie)
-        // Despawn an entity when clicked:
-        .insert(PickableBundle::default())
         .insert(On::<Pointer<Move>>::target_component_mut::<Transform>(
             |_move, transform| {
-                transform.scale = Vec3::new(3.0, 2.0, 1.0);
+                transform.scale = Vec3::new(2.5, 2.0, 1.0);
             },
         ))
+        // Despawn an entity when clicked:
         .insert(On::<Pointer<Click>>::target_commands_mut(
             |_click, target_commands| {
                 target_commands.despawn();
@@ -176,8 +172,7 @@ fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         Rotator { speed: 1.0 },
         Spaceship,
-        PickableBundle::default(),
-        On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+        On::<Pointer<Drag>>::target_component_mut::<Transform>(move |drag, transform| {
             transform.rotate_local_y(drag.delta.x / 100.0);
             transform.rotate_local_x(drag.delta.y / 100.0);
         }),
@@ -204,8 +199,7 @@ fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
             Rotator { speed: 1.0 },
             Mausi,
             //make Mausi dgraggable:
-            PickableBundle::default(),
-            On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+            On::<Pointer<Drag>>::target_component_mut::<Transform>(move |drag, transform| {
                 transform.translation.x += drag.delta.x;
                 transform.translation.y -= drag.delta.y;
             }),
@@ -231,12 +225,11 @@ fn spawn_image_button_and_scoreboard(mut commands: Commands, asset_server: Res<A
             style: Style {
                 display: Display::Flex,
                 justify_self: JustifySelf::Center,
-                top: Val::Percent(50.0),
+                top: Val::Percent(45.0),
                 ..Default::default()
             },
             ..Default::default()
         },
-        PickableBundle::default(),
         On::<Pointer<Click>>::run(button_callback_click),
     ));
     make_scoreboard(commands);
@@ -433,7 +426,7 @@ fn check_score_changed(
     }
 }
 
-fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmitter>>){
+fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmitter>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }

@@ -23,7 +23,7 @@ pub struct AnimationStateResource {
 
 // EVENTS
 // #[derive(Event, Default, Debug)]
-// pub struct MyOwnCollisionEvent;
+// pub struct MyOwnXYZEvent;
 
 // PLUGINS
 
@@ -31,7 +31,7 @@ pub struct ClickDetectorPlugin;
 
 impl Plugin for ClickDetectorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (pause_system, click_detect_system));
+        app.add_systems(Update, click_detect_system);
         //app.add_systems(Update, (click_detect_system, get_rid_of_mouse));
     }
 }
@@ -46,10 +46,4 @@ fn click_detect_system(
     };
 
     //println!("animation state: {:#?}", animation_state.moving);
-}
-
-fn pause_system(keyboard_input: Res<ButtonInput<KeyCode>>) {
-    if keyboard_input.pressed(KeyCode::Space) {
-        //TODO: Pause game (learn about GameState first...)
-    };
 }
