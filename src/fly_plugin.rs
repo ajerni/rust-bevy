@@ -1,4 +1,5 @@
 use crate::controls::Spaceship;
+use crate::gamestate::GameState;
 
 use bevy::prelude::*;
 
@@ -6,7 +7,7 @@ pub struct FlyPlugin;
 
 impl Plugin for FlyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, fly_system);
+        app.add_systems(Update, fly_system.run_if(in_state(GameState::Playing)));
     }
 }
 

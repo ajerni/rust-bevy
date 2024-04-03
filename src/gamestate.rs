@@ -9,13 +9,6 @@ pub enum GameState {
 }
 
 #[derive(States, Clone, Copy, Default, Eq, PartialEq, Hash, Debug)]
-pub enum PausedState {
-    #[default]
-    NotPaused,
-    Paused,
-}
-
-#[derive(States, Clone, Copy, Default, Eq, PartialEq, Hash, Debug)]
 pub enum SchneckenEmitterState {
     #[default]
     NotEmitting,

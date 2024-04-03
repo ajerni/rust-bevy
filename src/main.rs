@@ -47,7 +47,6 @@ fn main() {
         })
         .init_resource::<MyTimer>()
         .init_state::<GameState>()
-        .init_state::<PausedState>()
         .init_state::<SchneckenEmitterState>()
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins)
