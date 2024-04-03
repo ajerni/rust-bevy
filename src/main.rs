@@ -1,5 +1,7 @@
 mod controls;
 mod fly_plugin;
+mod gamestate;
+mod particle;
 mod schnecke;
 mod scoreboard;
 mod texts;
@@ -9,8 +11,11 @@ use bevy_mod_picking::events::{Click, Drag, Move, Pointer};
 use bevy_mod_picking::prelude::On;
 use bevy_mod_picking::{DefaultPickingPlugins, PickableBundle};
 
+use crate::gamestate::*;
+use crate::particle::*;
 use crate::schnecke::*;
 use crate::scoreboard::*;
+use bevy_enoki::prelude::*;
 use controls::{AnimationStateResource, ClickDetectorPlugin, Cubie, Mausi, Spaceship};
 use fly_plugin::FlyPlugin;
 use texts::MyTextPlugin;
@@ -36,16 +41,32 @@ fn main() {
     App::new()
         .insert_resource(AnimationStateResource { moving: false })
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 1.0)))
-        .insert_resource(Scoreboard { score: 0, highscore: 0 })
+        .insert_resource(Scoreboard {
+            score: 0,
+            highscore: 0,
+        })
         .init_resource::<MyTimer>()
+        .init_state::<GameState>()
+        .init_state::<PausedState>()
+        .init_state::<SchneckenEmitterState>()
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins)
         .add_plugins((ClickDetectorPlugin, MyTextPlugin, FlyPlugin))
+        .add_plugins(EnokiPlugin) //for particle emmitters
         .add_systems(Startup, (setup_system, setup_ship_and_maus))
         .add_systems(
             PostStartup,
             (spawn_image_button_and_scoreboard, spawn_highscore),
         )
+        // .add_systems(
+        //     FixedUpdate,
+        //     spawn_schnecke_emitter.run_if(in_state(SchneckenEmitterState::Emitting)),
+        // )
+        .add_systems(
+            OnEnter(SchneckenEmitterState::Emitting),
+            spawn_schnecke_emitter,
+        )
+        .add_systems(OnExit(SchneckenEmitterState::Emitting), destroy_emitter)
         .add_systems(
             Update,
             (
@@ -55,6 +76,7 @@ fn main() {
                 listen_for_collision_events,
                 update_scoreboard,
                 update_highscore,
+                check_score_changed,
             ),
         )
         .add_systems(FixedUpdate, rotate_system)
@@ -225,6 +247,15 @@ fn spawn_highscore(commands: Commands) {
     make_highscore(commands);
 }
 
+//spanw Schnecken-Emitter:
+fn spawn_schnecke_emitter(
+    commands: Commands,
+    asset_server: Res<AssetServer>,
+    materials: ResMut<Assets<SpriteParticle2dMaterial>>,
+) {
+    emit_particle(commands, materials, asset_server)
+}
+
 fn _make_beep(asset_server: &Res<AssetServer>, commands: &mut Commands) {
     commands.spawn(AudioBundle {
         source: asset_server.load("sounds/beep.mp3"),
@@ -328,6 +359,7 @@ fn rotate_system_flugi(
 }
 
 fn listen_for_collision_events(
+    //CollisionEvent comes from rapier2d (Alternative könnte bevy_xpbd_2d sein)
     mut collision_events: EventReader<CollisionEvent>,
     asset_server: Res<AssetServer>,
     mut commands: Commands,
@@ -370,8 +402,11 @@ fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text, Wi
     text.sections[1].value = scoreboard.score.to_string();
 }
 
-fn update_highscore(keyboard_input: Res<ButtonInput<KeyCode>>,mut scoreboard: ResMut<Scoreboard>, mut query: Query<&mut Text, With<HighscoreUi>>) {
-
+fn update_highscore(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut scoreboard: ResMut<Scoreboard>,
+    mut query: Query<&mut Text, With<HighscoreUi>>,
+) {
     if scoreboard.score > scoreboard.highscore {
         scoreboard.highscore = scoreboard.score;
     }
@@ -386,3 +421,39 @@ fn update_highscore(keyboard_input: Res<ButtonInput<KeyCode>>,mut scoreboard: Re
         scoreboard.highscore = 0;
     }
 }
+
+fn check_score_changed(
+    my_res: Res<Scoreboard>,
+    mut next_state: ResMut<NextState<SchneckenEmitterState>>,
+) {
+    if my_res.score == 3 {
+        next_state.set(SchneckenEmitterState::Emitting);
+    } else {
+        //Destroy the schnecken emitter if existing
+        next_state.set(SchneckenEmitterState::NotEmitting);
+    }
+}
+
+fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmitter>>){
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
+// Option with Option :-) - in case the state might not be initiallized yet or to queue the transition
+// fn check_score_changed(
+//     my_res: Res<Scoreboard>,
+//     state : Res<State<SchneckenEmitterState>>,
+//     next_state: Option<ResMut<NextState<SchneckenEmitterState>>>,
+// )
+// {
+//     if my_res.score == 3 {
+//         let my_state = state.get();
+//         if my_state == &SchneckenEmitterState::NotEmitting {
+//             println!("You won! Congratulations!");
+//             println!("State before transition: {:?}", my_state);
+
+//             Some(next_state.unwrap().set(SchneckenEmitterState::Emitting));
+//         }
+//     }
+// }

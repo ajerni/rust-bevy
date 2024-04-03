@@ -10,6 +10,7 @@ bevy = { version = "0.13.1", features = ["dynamic_linking", "mp3"] }
 rand = "0.8.5"
 bevy_mod_picking = "0.18.2"
 bevy_rapier2d = {version = "0.25.0", features = ["simd-stable", "parallel"]}
+bevy_enoki = "0.1"
 
 
 [profile.dev]
