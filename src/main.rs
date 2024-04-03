@@ -36,7 +36,7 @@ fn main() {
     App::new()
         .insert_resource(AnimationStateResource { moving: false })
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 1.0)))
-        .insert_resource(Scoreboard { score: 0 })
+        .insert_resource(Scoreboard { score: 0, highscore: 0 })
         .init_resource::<MyTimer>()
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins)
@@ -54,6 +54,7 @@ fn main() {
                 move_schnecke,
                 listen_for_collision_events,
                 update_scoreboard,
+                update_highscore,
             ),
         )
         .add_systems(FixedUpdate, rotate_system)
@@ -367,4 +368,21 @@ fn listen_for_collision_events(
 fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text, With<ScoreboardUi>>) {
     let mut text = query.single_mut();
     text.sections[1].value = scoreboard.score.to_string();
+}
+
+fn update_highscore(keyboard_input: Res<ButtonInput<KeyCode>>,mut scoreboard: ResMut<Scoreboard>, mut query: Query<&mut Text, With<HighscoreUi>>) {
+
+    if scoreboard.score > scoreboard.highscore {
+        scoreboard.highscore = scoreboard.score;
+    }
+    let mut text = query.single_mut();
+    text.sections[1].value = scoreboard.highscore.to_string();
+
+    //Reset functions for Score and Highscore:
+    if keyboard_input.just_pressed(KeyCode::KeyS) {
+        scoreboard.score = 0;
+    }
+    if keyboard_input.just_pressed(KeyCode::KeyH) {
+        scoreboard.highscore = 0;
+    }
 }

@@ -3,6 +3,7 @@ use bevy::prelude::*;
 #[derive(Resource, Default, Debug)]
 pub struct Scoreboard {
     pub score: usize,
+    pub highscore: usize,
 }
 
 #[derive(Component, Debug)]
@@ -21,7 +22,7 @@ pub fn make_scoreboard(mut commands: Commands) {
         ScoreboardUi,
         TextBundle::from_sections([
             TextSection::new(
-                "Score: ",
+                "Score (reset with 's'): ",
                 TextStyle {
                     font_size: SCOREBOARD_FONT_SIZE,
                     color: TEXT_COLOR,
@@ -48,7 +49,7 @@ pub fn make_highscore(mut commands: Commands) {
         HighscoreUi,
         TextBundle::from_sections([
             TextSection::new(
-                "High-Score: ",
+                "High-Score (reset with 'h'): ",
                 TextStyle {
                     font_size: SCOREBOARD_FONT_SIZE,
                     color: TEXT_COLOR,
