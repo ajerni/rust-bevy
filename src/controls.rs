@@ -22,8 +22,9 @@ pub struct AnimationStateResource {
 }
 
 // EVENTS
-// #[derive(Event, Default, Debug)]
-// pub struct MyOwnXYZEvent;
+
+#[derive(Event, Default, Debug)]
+pub struct MyLastLoadEvent;
 
 // PLUGINS
 

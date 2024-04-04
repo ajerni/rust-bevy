@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::GameState;
-//use crate::Rotator;
+//use crate::controls::MyLastLoadEvent;
 
 pub struct MyTextPlugin;
 
@@ -11,6 +11,7 @@ struct InsturctionText;
 impl Plugin for MyTextPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, write_text_system)
+            //.add_systems(Startup, write_text_system.run_if(on_event::<MyLastLoadEvent>()))
             .add_systems(Update, change_text_color_on_paused);
     }
 }

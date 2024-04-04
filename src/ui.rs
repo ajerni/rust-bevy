@@ -7,12 +7,12 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, main_menu)
+        app.add_systems(PreStartup, main_menu)
             .add_systems(OnEnter(GameState::Menu), show_menu)
             .add_systems(OnExit(GameState::Menu), hide_menu)
+            .add_systems(Update, escape_to_main_menu)
             .add_systems(Update, go_to_game)
             .add_systems(Update, go_to_emit);
-      
     }
 }
 
@@ -73,10 +73,23 @@ fn go_to_game(
 fn go_to_emit(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<SchneckenEmitterState>>,
+    mut query: Query<&mut BackgroundColor, With<MainMenu>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyW) {
+        let mut color = query.single_mut();
+        color.0 = Color::NONE; // Set background color to transparent
         next_state.set(SchneckenEmitterState::Emitting);
     }
 }
 
-// see escape_to_main_menu() in main.rs (sets GameState::Menu)
+fn escape_to_main_menu(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut next_state: ResMut<NextState<GameState>>,
+    mut query: Query<&mut BackgroundColor, With<MainMenu>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        let mut color = query.single_mut();
+        color.0 = Color::DARK_GREEN;
+        next_state.set(GameState::Menu);
+    }
+}

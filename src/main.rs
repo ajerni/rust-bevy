@@ -7,12 +7,14 @@ mod schnecke;
 mod scoreboard;
 mod texts;
 mod timers;
+mod button;
 pub mod ui;
 
 use bevy_mod_picking::events::{Click, Drag, Move, Pointer};
 use bevy_mod_picking::prelude::On;
 use bevy_mod_picking::DefaultPickingPlugins;
 
+use crate::button::*;
 use crate::gamestate::*;
 use crate::particle::*;
 use crate::paused::*;
@@ -74,9 +76,11 @@ fn main() {
             (setup_system, setup_ship_and_maus).run_if(in_state(GameState::Playing)),
         )
         .add_systems(
-            PostStartup,
-            (spawn_image_button_and_scoreboard, spawn_highscore)
-                .run_if(in_state(GameState::Playing)),
+            //PostStartup,
+            Startup,
+            (spawn_image_button, spawn_scoreboard, spawn_highscore).after(setup_ship_and_maus)
+            .run_if(in_state(GameState::Playing)),
+            // .run_if(in_state(GameState::Playing).and_then(on_event::<MyLastLoadEvent>())),
         )
         .add_systems(
             OnEnter(SchneckenEmitterState::Emitting),
@@ -95,7 +99,6 @@ fn main() {
                 init_highscore_holder,
                 update_highscore,
                 check_score_changed,
-                escape_to_main_menu,
                 button_timer_system,
             )
                 .chain()
@@ -171,13 +174,16 @@ fn setup_system(
         AudioBundle {
             source: asset_server.load("sounds/Windless Slopes.ogg"),
             settings: PlaybackSettings::LOOP,
-            ..default()
         },
         MyBackgroundMusic,
     ));
 }
 
-fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_ship_and_maus(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    // mut event_writer: EventWriter<MyLastLoadEvent>
+) {
     commands.spawn((
         SceneBundle {
             scene: asset_server.load("models/Spaceship.glb#Scene0"),
@@ -243,27 +249,16 @@ fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
     //spawn Schnecke:
     let schnecke_pos = Vec3::new(-700.0, -300.0, 0.0);
     spawn_schnecke(commands, asset_server, schnecke_pos);
+
+    //send MyEvent to trigger last loads
+    //event_writer.send(MyLastLoadEvent);
 }
 
-fn spawn_image_button_and_scoreboard(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
-        ImageBundle {
-            image: asset_server.load("textures/click.png").into(),
-            transform: Transform {
-                translation: Vec3::new(0.0, 0.0, 0.0),
-                rotation: Default::default(),
-                scale: Vec3::new(0.5, 0.5, 0.5),
-            },
-            style: Style {
-                display: Display::Flex,
-                justify_self: JustifySelf::Center,
-                top: Val::Percent(45.0),
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-        On::<Pointer<Click>>::run(button_callback_click),
-    ));
+fn spawn_image_button(commands: Commands, asset_server: Res<AssetServer>) {
+    make_button(commands, asset_server);
+}
+
+fn spawn_scoreboard(commands: Commands) {
     make_scoreboard(commands);
 }
 
@@ -286,25 +281,6 @@ fn _make_beep(asset_server: &Res<AssetServer>, commands: &mut Commands) {
         settings: PlaybackSettings::ONCE,
         //..default()
     });
-}
-
-fn button_callback_click(
-    mut query: Query<&mut Transform, With<UiImage>>,
-    mut timer: ResMut<MyTimer>,
-    asset_server: Res<AssetServer>,
-    commands: Commands,
-) {
-    println!("Button clicked!");
-    //make_beep(&mut asset_server, &mut commands);
-
-    let mut transform = query.single_mut();
-    transform.scale = Vec3::new(0.3, 0.3, 0.3);
-
-    timer.0.reset();
-
-    //spawn Schnecke again:
-    let schnecke_pos = Vec3::new(-700.0, -300.0, 0.0);
-    spawn_schnecke(commands, asset_server, schnecke_pos);
 }
 
 //SYSTEMS:
@@ -504,13 +480,4 @@ fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic
 
 fn init_state_for_camera(mut next_state: ResMut<NextState<GameState>>) {
     next_state.set(GameState::Menu);
-}
-
-fn escape_to_main_menu(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut next_state: ResMut<NextState<GameState>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::Escape) {
-        next_state.set(GameState::Menu);
-    }
 }
