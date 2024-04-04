@@ -58,11 +58,17 @@ fn main() {
         .init_state::<SchneckenEmitterState>()
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins) // for drag&drop and hover(move)
-        .add_plugins((ClickDetectorPlugin, MyTextPlugin, FlyPlugin, PausePlugin, UiPlugin))
+        .add_plugins((
+            ClickDetectorPlugin,
+            MyTextPlugin,
+            FlyPlugin,
+            PausePlugin,
+            UiPlugin,
+        ))
         .add_plugins(EnokiPlugin) //for particle emmitters
         //.add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_systems(PostStartup, init_state)
+        .add_systems(PostStartup, init_state_for_camera)
         .add_systems(
             Startup,
             (setup_system, setup_ship_and_maus).run_if(in_state(GameState::Playing)),
@@ -496,7 +502,7 @@ fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic
     }
 }
 
-fn init_state(mut next_state: ResMut<NextState<GameState>>) {
+fn init_state_for_camera(mut next_state: ResMut<NextState<GameState>>) {
     next_state.set(GameState::Menu);
 }
 

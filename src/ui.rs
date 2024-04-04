@@ -41,6 +41,7 @@ pub fn main_menu(mut commands: Commands) {
                     align_items: AlignItems::Center,
                     ..default()
                 },
+                background_color: BackgroundColor(Color::DARK_GREEN),
                 ..default()
             },
             MainMenu,
@@ -77,3 +78,5 @@ fn go_to_emit(
         next_state.set(SchneckenEmitterState::Emitting);
     }
 }
+
+// see escape_to_main_menu() in main.rs (sets GameState::Menu)

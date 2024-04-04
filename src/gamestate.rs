@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
+//starting in Playing here to get initial camera
+
 #[derive(States, Clone, Copy, Default, Eq, PartialEq, Hash, Debug)]
 pub enum GameState {
     #[default]
     Playing,
     Menu,
     Paused,
-    Other,
 }
 
 #[derive(States, Clone, Copy, Default, Eq, PartialEq, Hash, Debug)]
