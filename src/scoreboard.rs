@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct Scoreboard {
     pub score: usize,
     pub highscore: usize,
+    pub highscore_holder: String,
 }
 
 #[derive(Component, Debug)]
@@ -61,6 +62,20 @@ pub fn make_highscore(mut commands: Commands) {
                 color: SCORE_COLOR,
                 ..default()
             }),
+            TextSection::new(
+                " from: ",
+                TextStyle {
+                    font_size: SCOREBOARD_FONT_SIZE,
+                    color: TEXT_COLOR,
+                    ..default()
+                },
+            ),
+            TextSection::from_style(TextStyle {
+                font_size: SCOREBOARD_FONT_SIZE,
+                color: SCORE_COLOR,
+                ..default()
+            }),
+            
         ])
         .with_style(Style {
             position_type: PositionType::Absolute,

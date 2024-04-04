@@ -18,7 +18,7 @@ impl Plugin for MyTextPlugin {
 fn write_text_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         TextBundle::from_section(
-            "Space = Pause / Catch 3 snails with mouse!",
+            "Space = Pause / ESC = Menu",
             TextStyle {
                 font: asset_server.load("fonts/FiraMono-Medium.ttf"),
                 font_size: 24.,
@@ -32,8 +32,8 @@ fn write_text_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             //align_self: AlignSelf::Center, // Center horizontally on the screen
             top: Val::Percent(5.0),
             margin: UiRect {
-                right: Val::Percent(4.),
-                top: Val::Percent(2.),
+                right: Val::Percent(2.),
+                top: Val::Percent(0.5),
                 ..default()
             },
             ..default()

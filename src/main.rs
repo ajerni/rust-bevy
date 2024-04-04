@@ -43,6 +43,7 @@ fn main() {
         .insert_resource(Scoreboard {
             score: 0,
             highscore: 0,
+            highscore_holder: String::from("Andi"),
         })
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
@@ -79,6 +80,7 @@ fn main() {
                 move_schnecke,
                 listen_for_collision_events,
                 update_scoreboard,
+                init_highscore_holder,
                 update_highscore,
                 check_score_changed,
             )
@@ -403,15 +405,25 @@ fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text, Wi
     text.sections[1].value = scoreboard.score.to_string();
 }
 
+fn init_highscore_holder(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text, With<HighscoreUi>>) {
+    let mut text = query.single_mut();
+    text.sections[3].value = scoreboard.highscore_holder.clone();
+}
+
 fn update_highscore(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut scoreboard: ResMut<Scoreboard>,
     mut query: Query<&mut Text, With<HighscoreUi>>,
 ) {
+    let mut text = query.single_mut();
+
     if scoreboard.score > scoreboard.highscore {
         scoreboard.highscore = scoreboard.score;
+        //TODO: set this name from input field from Menu Screen & initally from DB
+        scoreboard.highscore_holder = String::from("New Holder");
+        text.sections[3].value = scoreboard.highscore_holder.clone();
     }
-    let mut text = query.single_mut();
+    
     text.sections[1].value = scoreboard.highscore.to_string();
 
     //Reset functions for Score and Highscore:
@@ -459,11 +471,8 @@ fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmi
     }
 }
 
-fn pause_music_toggle(
-    // game_state: Res<State<GameState>>,
-    //keyboard_input: Res<ButtonInput<KeyCode>>,
-    music_controller: Query<&AudioSink, With<MyBackgroundMusic>>,
-) {
+fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic>>,) {
+    // pattern matching on Result<T, E>
     if let Ok(sink) = music_controller.get_single() {
         sink.toggle();
     }
