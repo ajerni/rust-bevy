@@ -33,6 +33,9 @@ pub struct Rotator {
     speed: f32,
 }
 
+#[derive(Component)]
+struct MyBackgroundMusic;
+
 fn main() {
     App::new()
         .insert_resource(AnimationStateResource { moving: false })
@@ -66,6 +69,8 @@ fn main() {
             spawn_schnecke_emitter,
         )
         .add_systems(OnExit(SchneckenEmitterState::Emitting), destroy_emitter)
+        .add_systems(OnEnter(GameState::Paused), pause_music_toggle)
+        .add_systems(OnExit(GameState::Paused), pause_music_toggle)
         .add_systems(
             Update,
             (
@@ -145,10 +150,14 @@ fn setup_system(
 
     commands.spawn(DirectionalLightBundle { ..default() });
 
-    commands.spawn(AudioBundle {
-        source: asset_server.load("sounds/Windless Slopes.ogg"),
-        settings: PlaybackSettings::LOOP,
-    });
+    commands.spawn((
+        AudioBundle {
+            source: asset_server.load("sounds/Windless Slopes.ogg"),
+            //settings: PlaybackSettings::LOOP,
+            ..default()
+        },
+        MyBackgroundMusic,
+    ));
 }
 
 fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -263,7 +272,7 @@ fn button_callback_click(
     commands: Commands,
 ) {
     println!("Button clicked!");
-    // make_beep(&mut asset_server, &mut commands);
+    //make_beep(&mut asset_server, &mut commands);
 
     let mut transform = query.single_mut();
     transform.scale = Vec3::new(0.3, 0.3, 0.3);
@@ -426,12 +435,6 @@ fn check_score_changed(
     }
 }
 
-fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmitter>>) {
-    for entity in query.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
-}
-
 // Option with Option :-) - in case the state might not be initiallized yet or to queue the transition
 // fn check_score_changed(
 //     my_res: Res<Scoreboard>,
@@ -449,3 +452,19 @@ fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmi
 //         }
 //     }
 // }
+
+fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmitter>>) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
+fn pause_music_toggle(
+    // game_state: Res<State<GameState>>,
+    //keyboard_input: Res<ButtonInput<KeyCode>>,
+    music_controller: Query<&AudioSink, With<MyBackgroundMusic>>,
+) {
+    if let Ok(sink) = music_controller.get_single() {
+        sink.toggle();
+    }
+}
