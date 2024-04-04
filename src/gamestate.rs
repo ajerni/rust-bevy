@@ -6,6 +6,7 @@ pub enum GameState {
     Playing,
     Menu,
     Paused,
+    Other,
 }
 
 #[derive(States, Clone, Copy, Default, Eq, PartialEq, Hash, Debug)]

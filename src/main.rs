@@ -58,11 +58,11 @@ fn main() {
         .init_state::<SchneckenEmitterState>()
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins) // for drag&drop and hover(move)
-        .add_plugins((ClickDetectorPlugin, MyTextPlugin, FlyPlugin, PausePlugin))
+        .add_plugins((ClickDetectorPlugin, MyTextPlugin, FlyPlugin, PausePlugin, UiPlugin))
         .add_plugins(EnokiPlugin) //for particle emmitters
         //.add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugins(UiPlugin)
+        .add_systems(PostStartup, init_state)
         .add_systems(
             Startup,
             (setup_system, setup_ship_and_maus).run_if(in_state(GameState::Playing)),
@@ -83,7 +83,6 @@ fn main() {
             Update,
             (
                 rotate_system_flugi,
-                button_timer_system,
                 move_schnecke,
                 listen_for_collision_events,
                 update_scoreboard,
@@ -91,9 +90,10 @@ fn main() {
                 update_highscore,
                 check_score_changed,
                 escape_to_main_menu,
+                button_timer_system,
             )
-                .chain() //chain ensures to add the systems in the given order
-                .run_if(in_state(GameState::Playing)),
+                .chain()
+                .run_if(in_state(GameState::Playing)), //chain ensures to add the systems in the given order
         )
         .add_systems(
             FixedUpdate,
@@ -101,6 +101,7 @@ fn main() {
         )
         .add_systems(
             FixedUpdate,
+            // 'or_else()' false/true AND 'and_then()' true/true
             color_change_system.run_if(on_timer(std::time::Duration::from_secs(2))),
         )
         .run();
@@ -197,7 +198,13 @@ fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
         }),
     ));
 
-    commands.spawn(Camera2dBundle { ..default() });
+    commands.spawn(Camera2dBundle {
+        camera: Camera {
+            order: 2,
+            ..default()
+        },
+        ..default()
+    });
 
     //spawn takes a tuple of components and adds them to the entity
     commands
@@ -489,7 +496,14 @@ fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic
     }
 }
 
-fn escape_to_main_menu(keyboard_input: Res<ButtonInput<KeyCode>>, mut next_state: ResMut<NextState<GameState>>){
+fn init_state(mut next_state: ResMut<NextState<GameState>>) {
+    next_state.set(GameState::Menu);
+}
+
+fn escape_to_main_menu(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
         next_state.set(GameState::Menu);
     }

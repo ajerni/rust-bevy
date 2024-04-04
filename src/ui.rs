@@ -1,15 +1,18 @@
 use bevy::prelude::*;
 
 use crate::gamestate::GameState;
+use crate::gamestate::SchneckenEmitterState;
 
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.add_systems(Startup, main_menu.run_if(in_state(GameState::Menu)))
-            .add_systems(Update, go_to_game.run_if(in_state(GameState::Menu)))
+        app.add_systems(Startup, main_menu)
             .add_systems(OnEnter(GameState::Menu), show_menu)
-            .add_systems(OnExit(GameState::Menu), hide_menu);
+            .add_systems(OnExit(GameState::Menu), hide_menu)
+            .add_systems(Update, go_to_game)
+            .add_systems(Update, go_to_emit);
+      
     }
 }
 
@@ -27,7 +30,6 @@ fn hide_menu(mut menu: Query<&mut Visibility, With<MainMenu>>) {
 }
 
 pub fn main_menu(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
     commands
         .spawn((
             NodeBundle {
@@ -46,7 +48,7 @@ pub fn main_menu(mut commands: Commands) {
         .with_children(|parent| {
             parent.spawn(
                 TextBundle::from_section(
-                    "MY MAIN MENU COMES HERE",
+                    "MAIN MENU \n\nPress G to start the game \n\nPress W to preview the winning state",
                     TextStyle {
                         font: default(),
                         font_size: 25.0,
@@ -58,12 +60,20 @@ pub fn main_menu(mut commands: Commands) {
         });
 }
 
-fn go_to_game(keyboard_input: Res<ButtonInput<KeyCode>>, mut next_state: ResMut<NextState<GameState>>){
+fn go_to_game(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
     if keyboard_input.just_pressed(KeyCode::KeyG) {
         next_state.set(GameState::Playing);
     }
 }
 
-// TODO: solve this issue:
-// works when starting in GameState::Menu, but crashes with following error when setting GameStage:Menu comming from GameState:Playing
-// NoEntities("bevy_ecs::query::state::QueryState<&mut bevy_render::view::visibility::Visibility, bevy_ecs::query::filter::With<shapetest::ui::MainMenu>>")
+fn go_to_emit(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut next_state: ResMut<NextState<SchneckenEmitterState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::KeyW) {
+        next_state.set(SchneckenEmitterState::Emitting);
+    }
+}
