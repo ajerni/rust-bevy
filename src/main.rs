@@ -7,6 +7,7 @@ mod schnecke;
 mod scoreboard;
 mod texts;
 mod timers;
+pub mod ui;
 
 use bevy_mod_picking::events::{Click, Drag, Move, Pointer};
 use bevy_mod_picking::prelude::On;
@@ -17,6 +18,7 @@ use crate::particle::*;
 use crate::paused::*;
 use crate::schnecke::*;
 use crate::scoreboard::*;
+use crate::ui::*;
 use bevy_enoki::prelude::*;
 use controls::{AnimationStateResource, ClickDetectorPlugin, Cubie, Mausi, Spaceship};
 use fly_plugin::FlyPlugin;
@@ -60,10 +62,15 @@ fn main() {
         .add_plugins(EnokiPlugin) //for particle emmitters
         //.add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_systems(Startup, (setup_system, setup_ship_and_maus))
+        .add_plugins(UiPlugin)
+        .add_systems(
+            Startup,
+            (setup_system, setup_ship_and_maus).run_if(in_state(GameState::Playing)),
+        )
         .add_systems(
             PostStartup,
-            (spawn_image_button_and_scoreboard, spawn_highscore),
+            (spawn_image_button_and_scoreboard, spawn_highscore)
+                .run_if(in_state(GameState::Playing)),
         )
         .add_systems(
             OnEnter(SchneckenEmitterState::Emitting),
@@ -83,8 +90,9 @@ fn main() {
                 init_highscore_holder,
                 update_highscore,
                 check_score_changed,
+                escape_to_main_menu,
             )
-                .chain()
+                .chain() //chain ensures to add the systems in the given order
                 .run_if(in_state(GameState::Playing)),
         )
         .add_systems(
@@ -405,7 +413,10 @@ fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text, Wi
     text.sections[1].value = scoreboard.score.to_string();
 }
 
-fn init_highscore_holder(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text, With<HighscoreUi>>) {
+fn init_highscore_holder(
+    scoreboard: Res<Scoreboard>,
+    mut query: Query<&mut Text, With<HighscoreUi>>,
+) {
     let mut text = query.single_mut();
     text.sections[3].value = scoreboard.highscore_holder.clone();
 }
@@ -423,7 +434,7 @@ fn update_highscore(
         scoreboard.highscore_holder = String::from("New Holder");
         text.sections[3].value = scoreboard.highscore_holder.clone();
     }
-    
+
     text.sections[1].value = scoreboard.highscore.to_string();
 
     //Reset functions for Score and Highscore:
@@ -471,9 +482,15 @@ fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmi
     }
 }
 
-fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic>>,) {
+fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic>>) {
     // pattern matching on Result<T, E>
     if let Ok(sink) = music_controller.get_single() {
         sink.toggle();
+    }
+}
+
+fn escape_to_main_menu(keyboard_input: Res<ButtonInput<KeyCode>>, mut next_state: ResMut<NextState<GameState>>){
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        next_state.set(GameState::Menu);
     }
 }

@@ -10,7 +10,7 @@ struct InsturctionText;
 
 impl Plugin for MyTextPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, write_text_system)
+        app.add_systems(Startup, write_text_system.run_if(in_state(GameState::Playing)))
             .add_systems(Update, change_text_color_on_paused);
     }
 }

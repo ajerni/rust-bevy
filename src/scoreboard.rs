@@ -75,7 +75,6 @@ pub fn make_highscore(mut commands: Commands) {
                 color: SCORE_COLOR,
                 ..default()
             }),
-            
         ])
         .with_style(Style {
             position_type: PositionType::Absolute,
