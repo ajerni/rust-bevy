@@ -164,7 +164,7 @@ fn setup_system(
     commands.spawn((
         AudioBundle {
             source: asset_server.load("sounds/Windless Slopes.ogg"),
-            //settings: PlaybackSettings::LOOP,
+            settings: PlaybackSettings::LOOP,
             ..default()
         },
         MyBackgroundMusic,
