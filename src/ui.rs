@@ -77,7 +77,13 @@ fn go_to_emit(
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyW) {
         let mut color = query.single_mut();
-        color.0 = Color::NONE; // Set background color to transparent
+        color.0 = Color::Rgba {
+            red: 0.0,
+            green: 0.9,
+            blue: 0.0,
+            alpha: 0.8, //opacity
+        };
+        //color.0 = Color::NONE; // Set background color to transparent
         next_state.set(SchneckenEmitterState::Emitting);
     }
 }
@@ -88,8 +94,9 @@ fn escape_to_main_menu(
     mut query: Query<&mut BackgroundColor, With<MainMenu>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Escape) {
+        next_state.set(GameState::Menu);
         let mut color = query.single_mut();
         color.0 = Color::DARK_GREEN;
-        next_state.set(GameState::Menu);
+       
     }
 }

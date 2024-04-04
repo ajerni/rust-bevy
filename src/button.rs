@@ -49,3 +49,11 @@ fn button_callback_click(
     let schnecke_pos = Vec3::new(-700.0, -300.0, 0.0);
     spawn_schnecke(commands, asset_server, schnecke_pos);
 }
+
+fn _make_beep(asset_server: &Res<AssetServer>, commands: &mut Commands) {
+    commands.spawn(AudioBundle {
+        source: asset_server.load("sounds/beep.mp3"),
+        settings: PlaybackSettings::ONCE,
+        //..default()
+    });
+}

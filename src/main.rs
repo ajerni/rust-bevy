@@ -76,11 +76,9 @@ fn main() {
             (setup_system, setup_ship_and_maus).run_if(in_state(GameState::Playing)),
         )
         .add_systems(
-            //PostStartup,
             Startup,
-            (spawn_image_button, spawn_scoreboard, spawn_highscore).after(setup_ship_and_maus)
+            (spawn_button, spawn_scoreboard, spawn_highscore).chain().after(setup_ship_and_maus)
             .run_if(in_state(GameState::Playing)),
-            // .run_if(in_state(GameState::Playing).and_then(on_event::<MyLastLoadEvent>())),
         )
         .add_systems(
             OnEnter(SchneckenEmitterState::Emitting),
@@ -113,7 +111,43 @@ fn main() {
             // 'or_else()' false/true AND 'and_then()' true/true
             color_change_system.run_if(on_timer(std::time::Duration::from_secs(2))),
         )
+        .add_systems(OnEnter(GameState::Playing), show_button)
+        .add_systems(OnExit(GameState::Playing), hide_button)
+        .add_systems(OnEnter(GameState::Playing), show_score)
+        .add_systems(OnExit(GameState::Playing), hide_score)
+        .add_systems(OnEnter(GameState::Playing), show_highscore)
+        .add_systems(OnExit(GameState::Playing), hide_highscore)
         .run();
+}
+
+fn show_button(mut menu: Query<&mut Visibility, With<UiImage>>) {
+    let mut menu = menu.single_mut();
+    *menu = Visibility::Visible;
+}
+
+fn hide_button(mut menu: Query<&mut Visibility, With<UiImage>>) {
+    let mut menu = menu.single_mut();
+    *menu = Visibility::Hidden;
+}
+
+fn show_score(mut menu: Query<&mut Visibility, With<ScoreboardUi>>) {
+    let mut menu = menu.single_mut();
+    *menu = Visibility::Visible;
+}
+
+fn hide_score(mut menu: Query<&mut Visibility, With<ScoreboardUi>>) {
+    let mut menu = menu.single_mut();
+    *menu = Visibility::Hidden;
+}
+
+fn show_highscore(mut menu: Query<&mut Visibility, With<HighscoreUi>>) {
+    let mut menu = menu.single_mut();
+    *menu = Visibility::Visible;
+}
+
+fn hide_highscore(mut menu: Query<&mut Visibility, With<HighscoreUi>>) {
+    let mut menu = menu.single_mut();
+    *menu = Visibility::Hidden;
 }
 
 fn setup_system(
@@ -249,38 +283,29 @@ fn setup_ship_and_maus(
     //spawn Schnecke:
     let schnecke_pos = Vec3::new(-700.0, -300.0, 0.0);
     spawn_schnecke(commands, asset_server, schnecke_pos);
-
-    //send MyEvent to trigger last loads
-    //event_writer.send(MyLastLoadEvent);
+       
 }
 
-fn spawn_image_button(commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_button(commands: Commands,
+    asset_server: Res<AssetServer>,){
     make_button(commands, asset_server);
-}
+}  
 
-fn spawn_scoreboard(commands: Commands) {
+fn spawn_scoreboard(commands: Commands){
     make_scoreboard(commands);
 }
 
-fn spawn_highscore(commands: Commands) {
+fn spawn_highscore(commands: Commands){
     make_highscore(commands);
 }
 
-//spanw Schnecken-Emitter:
+//spanw Schnecken-Emitter (runs on set state):
 fn spawn_schnecke_emitter(
     commands: Commands,
     asset_server: Res<AssetServer>,
     materials: ResMut<Assets<SpriteParticle2dMaterial>>,
 ) {
     emit_particle(commands, materials, asset_server)
-}
-
-fn _make_beep(asset_server: &Res<AssetServer>, commands: &mut Commands) {
-    commands.spawn(AudioBundle {
-        source: asset_server.load("sounds/beep.mp3"),
-        settings: PlaybackSettings::ONCE,
-        //..default()
-    });
 }
 
 //SYSTEMS:
