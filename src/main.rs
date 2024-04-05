@@ -47,6 +47,7 @@ fn main() {
         .insert_resource(Scoreboard {
             score: 0,
             highscore: 0,
+            player_name: String::from("Andi"),
             highscore_holder: String::from("Andi"),
         })
         .insert_resource(RapierConfiguration {
@@ -204,6 +205,7 @@ fn setup_system(
 
     commands.spawn(DirectionalLightBundle { ..default() });
 
+    // Add a background music
     commands.spawn((
         AudioBundle {
             source: asset_server.load("sounds/Windless Slopes.ogg"),
@@ -216,7 +218,6 @@ fn setup_system(
 fn setup_ship_and_maus(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    // mut event_writer: EventWriter<MyLastLoadEvent>
 ) {
     commands.spawn((
         SceneBundle {
@@ -252,7 +253,7 @@ fn setup_ship_and_maus(
         ..default()
     });
 
-    //spawn takes a tuple of components and adds them to the entity
+    //spawn takes a tuple of components and creates an entity
     commands
         .spawn((
             RigidBody::Dynamic,
@@ -299,7 +300,7 @@ fn spawn_highscore(commands: Commands){
     make_highscore(commands);
 }
 
-//spanw Schnecken-Emitter (runs on set state):
+//spanw Schnecken-Emitter (runs on state change):
 fn spawn_schnecke_emitter(
     commands: Commands,
     asset_server: Res<AssetServer>,
@@ -444,8 +445,8 @@ fn update_highscore(
 
     if scoreboard.score > scoreboard.highscore {
         scoreboard.highscore = scoreboard.score;
-        //TODO: set this name from input field from Menu Screen & initally from DB
-        scoreboard.highscore_holder = String::from("New Holder");
+        //TODO: set this name and Highscoree initally from DB
+        scoreboard.highscore_holder = scoreboard.player_name.clone();
         text.sections[3].value = scoreboard.highscore_holder.clone();
     }
 

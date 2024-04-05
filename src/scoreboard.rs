@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub struct Scoreboard {
     pub score: usize,
     pub highscore: usize,
+    pub player_name: String,
     pub highscore_holder: String,
 }
 
