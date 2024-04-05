@@ -1,3 +1,4 @@
+mod button;
 mod controls;
 mod fly_plugin;
 mod gamestate;
@@ -7,7 +8,6 @@ mod schnecke;
 mod scoreboard;
 mod texts;
 mod timers;
-mod button;
 pub mod ui;
 
 use bevy_mod_picking::events::{Click, Drag, Move, Pointer};
@@ -78,8 +78,10 @@ fn main() {
         )
         .add_systems(
             Startup,
-            (spawn_button, spawn_scoreboard, spawn_highscore).chain().after(setup_ship_and_maus)
-            .run_if(in_state(GameState::Playing)),
+            (spawn_button, spawn_scoreboard, spawn_highscore)
+                .chain()
+                .after(setup_ship_and_maus)
+                .run_if(in_state(GameState::Playing)),
         )
         .add_systems(
             OnEnter(SchneckenEmitterState::Emitting),
@@ -215,10 +217,7 @@ fn setup_system(
     ));
 }
 
-fn setup_ship_and_maus(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
+fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SceneBundle {
             scene: asset_server.load("models/Spaceship.glb#Scene0"),
@@ -284,19 +283,17 @@ fn setup_ship_and_maus(
     //spawn Schnecke:
     let schnecke_pos = Vec3::new(-700.0, -300.0, 0.0);
     spawn_schnecke(commands, asset_server, schnecke_pos);
-       
 }
 
-fn spawn_button(commands: Commands,
-    asset_server: Res<AssetServer>,){
+fn spawn_button(commands: Commands, asset_server: Res<AssetServer>) {
     make_button(commands, asset_server);
-}  
+}
 
-fn spawn_scoreboard(commands: Commands){
+fn spawn_scoreboard(commands: Commands) {
     make_scoreboard(commands);
 }
 
-fn spawn_highscore(commands: Commands){
+fn spawn_highscore(commands: Commands) {
     make_highscore(commands);
 }
 
@@ -312,7 +309,7 @@ fn spawn_schnecke_emitter(
 //SYSTEMS:
 
 fn move_schnecke(mut query: Query<&mut Transform, With<Schnecke>>, time: Res<Time>) {
-    let speed = 45.0;
+    let speed = 90.0;
     let window_width = 650.0;
 
     for mut transform in query.iter_mut() {

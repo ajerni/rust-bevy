@@ -21,7 +21,6 @@ impl Plugin for UiPlugin {
             .add_systems(Update, go_to_emit)
             .add_plugins(TextInputPlugin)
             .add_systems(Update, text_input_listener);
-           
     }
 }
 
@@ -38,7 +37,11 @@ fn hide_menu(mut menu: Query<&mut Visibility, With<MainMenu>>) {
     *menu = Visibility::Hidden;
 }
 
-pub fn main_menu(mut commands: Commands) {
+pub fn main_menu(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
+
+) {
     commands
         .spawn((
             NodeBundle {
@@ -57,8 +60,28 @@ pub fn main_menu(mut commands: Commands) {
         ))
         .with_children(|parent| {
             parent.spawn(
+                TextBundle::from_sections([
+                    TextSection::new(
+                        "M A I N   M E N U".to_string(),
+                        TextStyle {
+                            font: asset_server.load("fonts/Roboto-Bold.ttf"),
+                            font_size: 60.0,
+                            color: Color::MIDNIGHT_BLUE,
+                        },
+                    ),
+                ])
+                .with_style(Style {
+                    justify_content: JustifyContent::Center, // Center horizontally
+                    position_type: PositionType::Absolute, // Use absolute positioning
+                    top: Val::Px(40.0), // Add a small top margin
+                    ..default()
+                }),
+            );
+        })
+        .with_children(|parent| {
+            parent.spawn(
                 TextBundle::from_section(
-                    "MAIN MENU \n\nEnter name and press Enter to start the game: \n\n\nPress W to preview the winning state",
+                    "Enter name and press Enter to start the game: \n\n\nPress W to preview the winning state",
                     TextStyle {
                         font: default(),
                         font_size: 25.0,
@@ -75,7 +98,7 @@ pub fn main_menu(mut commands: Commands) {
                         width: Val::Px(250.0),
                         border: UiRect::all(Val::Px(5.0)),
                         padding: UiRect::all(Val::Px(5.0)),
-                        top: Val::Px(-13.0),
+                        top: Val::Px(-36.0),
                         ..default()
                     },
                     border_color: BORDER_COLOR_ACTIVE.into(),
@@ -129,14 +152,15 @@ fn escape_to_main_menu(
         next_state.set(GameState::Menu);
         let mut color = query.single_mut();
         color.0 = Color::DARK_GREEN;
-       
     }
 }
 
-fn text_input_listener(mut events: EventReader<TextInputSubmitEvent>, mut scoreboard: ResMut<Scoreboard>) {
+fn text_input_listener(
+    mut events: EventReader<TextInputSubmitEvent>,
+    mut scoreboard: ResMut<Scoreboard>,
+) {
     for event in events.read() {
         info!("{:?} submitted: {:?}", event.entity, event.value);
-        scoreboard.player_name = event.value.clone(); 
+        scoreboard.player_name = event.value.clone();
     }
 }
-

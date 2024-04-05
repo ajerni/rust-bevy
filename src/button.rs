@@ -2,16 +2,12 @@ use bevy::prelude::*;
 use bevy_mod_picking::events::{Click, Pointer};
 use bevy_mod_picking::prelude::On;
 
-use crate::timers::MyTimer;
 use crate::schnecke::*;
+use crate::timers::MyTimer;
 
-pub fn make_button(
-    mut commands : Commands,
-    asset_server : Res<AssetServer>,
-){
-
-    commands.spawn((
-        ImageBundle {
+pub fn make_button(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands
+        .spawn((ImageBundle {
             image: asset_server.load("textures/click.png").into(),
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, 0.0),
@@ -25,10 +21,8 @@ pub fn make_button(
                 ..Default::default()
             },
             ..Default::default()
-        },
-        
-    )).insert(On::<Pointer<Click>>::run(button_callback_click));
-
+        },))
+        .insert(On::<Pointer<Click>>::run(button_callback_click));
 }
 
 fn button_callback_click(
