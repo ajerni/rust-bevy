@@ -6,12 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.13.1", features = ["dynamic_linking", "mp3"] }
+#bevy = { version = "0.13.1", features = ["dynamic_linking", "mp3"] }
+bevy = { version = "0.13.2", features = ["mp3"] } #take out dynamic_linking for webbuild
 rand = "0.8.5"
 bevy_mod_picking = "0.18.2"
-bevy_rapier2d = {version = "0.25.0", features = ["simd-stable", "parallel"]}
+bevy_rapier2d = {version = "0.25.0", features = ["simd-stable"]}
 bevy_enoki = "0.1"
-bevy_simple_text_input = "0.5.1"
+#bevy_simple_text_input = "0.5.1"
+bevy_simple_text_input = { git = "https://github.com/rparrett/bevy_simple_text_input" }
 
 
 [profile.dev]
@@ -20,3 +22,6 @@ opt-level = 1
 # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
 [profile.dev.package."*"]
 opt-level = 3
+
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"
