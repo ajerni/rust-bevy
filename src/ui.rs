@@ -37,11 +37,7 @@ fn hide_menu(mut menu: Query<&mut Visibility, With<MainMenu>>) {
     *menu = Visibility::Hidden;
 }
 
-pub fn main_menu(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>
-
-) {
+pub fn main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
             NodeBundle {

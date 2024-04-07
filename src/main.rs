@@ -1,5 +1,6 @@
 mod button;
 mod controls;
+mod db;
 mod fly_plugin;
 mod gamestate;
 mod particle;
@@ -9,14 +10,13 @@ mod scoreboard;
 mod texts;
 mod timers;
 pub mod ui;
-mod db;
 
 use bevy_mod_picking::events::{Click, Drag, Move, Pointer};
 use bevy_mod_picking::prelude::On;
 use bevy_mod_picking::DefaultPickingPlugins;
 
-use crate::db::*;
 use crate::button::*;
+use crate::db::*;
 use crate::gamestate::*;
 use crate::particle::*;
 use crate::paused::*;
@@ -61,7 +61,8 @@ fn main() {
         .init_resource::<MyTimer>() // init initializes with Default value
         .init_state::<GameState>()
         .init_state::<SchneckenEmitterState>()
-        .add_event::<GetDataEvent>()
+        .add_event::<GetDataEvent>() //my own event that triggers load from DB
+        .add_event::<UpdateDataEvent>() //my own event that triggers update of highscore in DB
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins) // for drag&drop and hover(move)
         .add_plugins((
@@ -164,7 +165,7 @@ fn setup_system(
     asset_server: Res<AssetServer>,
     mut get_highscore_event: EventWriter<GetDataEvent>,
 ) {
-    // Get Highscore from DB
+    // Get Highscore from DB (whenever this Event is sent it triggers update from DB)
     get_highscore_event.send_default();
 
     // Create a cuboid mesh
@@ -445,14 +446,16 @@ fn update_highscore(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut scoreboard: ResMut<Scoreboard>,
     mut query: Query<&mut Text, With<HighscoreUi>>,
+    mut update_highscore_event: EventWriter<UpdateDataEvent>,
 ) {
     let mut text = query.single_mut();
 
     if scoreboard.score > scoreboard.highscore {
         scoreboard.highscore = scoreboard.score;
-        //TODO: set this name and Highscoree initally from DB
         scoreboard.highscore_holder = scoreboard.player_name.clone();
         text.sections[3].value = scoreboard.highscore_holder.clone();
+        //updating the highscore in the DB:
+        update_highscore_event.send_default();
     }
 
     text.sections[1].value = scoreboard.highscore.to_string();

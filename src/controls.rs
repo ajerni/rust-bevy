@@ -26,6 +26,9 @@ pub struct AnimationStateResource {
 #[derive(Event, Default, Debug)]
 pub struct GetDataEvent;
 
+#[derive(Event, Default, Debug)]
+pub struct UpdateDataEvent;
+
 // PLUGINS
 
 pub struct ClickDetectorPlugin;
