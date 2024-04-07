@@ -41,8 +41,14 @@ fn send_request_get_highscore(mut ev_request: EventWriter<HttpRequest>) {
     ev_request.send(request);
 }
 
-fn send_request_update_highscore(mut ev_request: EventWriter<HttpRequest>) {
-    let payload = serde_json::json!({"isbn":"9901","title":"Bevy Data","author":"Andi Tester","metadata":{"avg_review":5.0,"tags":["DB still works","1"]}});
+fn send_request_update_highscore(
+    mut ev_request: EventWriter<HttpRequest>,
+    scoreboard: ResMut<Scoreboard>,
+) {
+    let new_name = &scoreboard.player_name;
+    let new_score = &scoreboard.score.to_string();
+
+    let payload = serde_json::json!({"isbn":"9901","title":"Bevy Data","author":"Andi Tester","metadata":{"avg_review":5.0,"tags":[new_name, new_score]}});
 
     let request = HttpClient::new()
         .patch("https://rust-sqlx.onrender.com/update/9901")
@@ -52,10 +58,21 @@ fn send_request_update_highscore(mut ev_request: EventWriter<HttpRequest>) {
     ev_request.send(request);
 }
 
+// fn send_request_update_highscore(mut ev_request: EventWriter<HttpRequest>) {
+//     let payload = serde_json::json!({"isbn":"9901","title":"Bevy Data","author":"Andi Tester","metadata":{"avg_review":5.0,"tags":["DB still works","1"]}});
+
+//     let request = HttpClient::new()
+//         .patch("https://rust-sqlx.onrender.com/update/9901")
+//         .json(&payload)
+//         .build();
+
+//     ev_request.send(request);
+// }
+
 
 fn handle_response(mut ev_resp: EventReader<HttpResponse>, mut scoreboard: ResMut<Scoreboard>) {
     for response in ev_resp.read() {
-        
+
         //response text: Some("Book updated successfully.") comes from DB in case of successful update
         println!("response text: {:?}", response.text());
 

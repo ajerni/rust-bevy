@@ -29,6 +29,12 @@ pub struct GetDataEvent;
 #[derive(Event, Default, Debug)]
 pub struct UpdateDataEvent;
 
+// #[derive(Event, Default, Debug)]
+// pub struct UpdateDataEvent {
+//     pub name: String,
+//     pub score: String,
+// }
+
 // PLUGINS
 
 pub struct ClickDetectorPlugin;
