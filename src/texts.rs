@@ -31,10 +31,9 @@ fn write_text_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             flex_direction: FlexDirection::Row,
             justify_self: JustifySelf::End, // Center vertically on the screen
             //align_self: AlignSelf::Center, // Center horizontally on the screen
-            top: Val::Percent(5.0),
+            top: Val::Percent(3.0),
             margin: UiRect {
                 right: Val::Percent(2.),
-                top: Val::Percent(0.5),
                 ..default()
             },
             ..default()
