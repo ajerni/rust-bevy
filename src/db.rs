@@ -58,18 +58,6 @@ fn send_request_update_highscore(
     ev_request.send(request);
 }
 
-// fn send_request_update_highscore(mut ev_request: EventWriter<HttpRequest>) {
-//     let payload = serde_json::json!({"isbn":"9901","title":"Bevy Data","author":"Andi Tester","metadata":{"avg_review":5.0,"tags":["DB still works","1"]}});
-
-//     let request = HttpClient::new()
-//         .patch("https://rust-sqlx.onrender.com/update/9901")
-//         .json(&payload)
-//         .build();
-
-//     ev_request.send(request);
-// }
-
-
 fn handle_response(mut ev_resp: EventReader<HttpResponse>, mut scoreboard: ResMut<Scoreboard>) {
     for response in ev_resp.read() {
 
