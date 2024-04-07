@@ -9,11 +9,13 @@ mod scoreboard;
 mod texts;
 mod timers;
 pub mod ui;
+mod db;
 
 use bevy_mod_picking::events::{Click, Drag, Move, Pointer};
 use bevy_mod_picking::prelude::On;
 use bevy_mod_picking::DefaultPickingPlugins;
 
+use crate::db::*;
 use crate::button::*;
 use crate::gamestate::*;
 use crate::particle::*;
@@ -22,7 +24,7 @@ use crate::schnecke::*;
 use crate::scoreboard::*;
 use crate::ui::*;
 use bevy_enoki::prelude::*;
-use controls::{AnimationStateResource, ClickDetectorPlugin, Cubie, Mausi, Spaceship};
+use controls::*;
 use fly_plugin::FlyPlugin;
 use texts::MyTextPlugin;
 use timers::MyTimer;
@@ -59,6 +61,7 @@ fn main() {
         .init_resource::<MyTimer>() // init initializes with Default value
         .init_state::<GameState>()
         .init_state::<SchneckenEmitterState>()
+        .add_event::<GetDataEvent>()
         .add_plugins(DefaultPlugins)
         .add_plugins(DefaultPickingPlugins) // for drag&drop and hover(move)
         .add_plugins((
@@ -67,6 +70,7 @@ fn main() {
             FlyPlugin,
             PausePlugin,
             UiPlugin,
+            DataPlugin,
         ))
         .add_plugins(EnokiPlugin) //for particle emmitters
         //.add_plugins(RapierDebugRenderPlugin::default())
@@ -158,7 +162,11 @@ fn setup_system(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
+    mut get_highscore_event: EventWriter<GetDataEvent>,
 ) {
+    // Get Highscore from DB
+    get_highscore_event.send_default();
+
     // Create a cuboid mesh
     let box_mesh = meshes.add(Cuboid::new(0.5, 0.25, 0.25));
 
