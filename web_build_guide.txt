@@ -10,3 +10,7 @@
 // create folder for webbuild:
 // copy index.html + change name of .js file according to .js file in out folder
 // add index.html & out folder & asset folder to webserver
+//
+// WASM File verkleinern:
+// (wasm-opt -Oz -o shrinkedfile_bg.wasm shapetest_bg.wasm)
+// (wasm-bindgen nochmals und name .js in index.html anpassen)

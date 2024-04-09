@@ -1081,8 +1081,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_simple_text_input"
-version = "0.5.1"
-source = "git+https://github.com/rparrett/bevy_simple_text_input#3da2e542389d1b372b05b126da2efa2cf06775ad"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a6782d39402ad0bbccbacfa54fce44ef5eadc4be4775af25132765792cb1155"
 dependencies = [
  "bevy",
 ]
