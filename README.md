@@ -14,6 +14,10 @@ It serves as my personal sandbox and documentation for learning and experimentin
 - **State Transitions**: Transition between different game states like playing and paused.
 - **Physics Simulation**: Simulate physics interactions using the Rapier physics engine.
 
-## Live Demo (binary converted to WASM)
+## Live Demo (binary converted to WASM):
 
 https://bevy.andierni.ch
+
+## Documentation:
+
+https://bevy.andierni.ch/doc/shapetest/index.html
