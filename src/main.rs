@@ -1,3 +1,11 @@
+//! # ECS (Entity, Component, System)
+//! 
+//! Bundles of components are spawned to the world as entities and are controlled
+//! by systems that run based on schedules.
+//! 
+//! ![ECS overview](https://csherratt.github.io/blog/posts/specs-and-legion/DraggedImage.png)
+//! 
+
 mod button;
 mod controls;
 mod db;
@@ -34,14 +42,29 @@ use bevy::time::common_conditions::on_timer;
 
 use bevy_rapier2d::prelude::*;
 
+
 #[derive(Component, Debug)]
+/// Component used to set the speed of the rotation
+/// 
+/// # Simply adding this component to an entity will rotate it at the given speed.
 pub struct Rotator {
     speed: f32,
 }
 
 #[derive(Component)]
+/// Marker struct for the backgound music
 struct MyBackgroundMusic;
 
+///Setting up the App
+/// 
+/// # Here is the place to:
+/// - insert resources
+/// - init resources
+/// - init states
+/// - add events
+/// - add plugins
+/// - add systems
+/// 
 fn main() {
     App::new()
         .insert_resource(AnimationStateResource { moving: false })
@@ -128,36 +151,43 @@ fn main() {
         .run();
 }
 
+/// using Visibility to show/hide UI elements
 fn show_button(mut menu: Query<&mut Visibility, With<UiImage>>) {
     let mut menu = menu.single_mut();
     *menu = Visibility::Visible;
 }
 
+/// using Visibility to show/hide UI elements
 fn hide_button(mut menu: Query<&mut Visibility, With<UiImage>>) {
     let mut menu = menu.single_mut();
     *menu = Visibility::Hidden;
 }
 
+/// using Visibility to show/hide UI elements
 fn show_score(mut menu: Query<&mut Visibility, With<ScoreboardUi>>) {
     let mut menu = menu.single_mut();
     *menu = Visibility::Visible;
 }
 
+/// using Visibility to show/hide UI elements
 fn hide_score(mut menu: Query<&mut Visibility, With<ScoreboardUi>>) {
     let mut menu = menu.single_mut();
     *menu = Visibility::Hidden;
 }
 
+/// using Visibility to show/hide UI elements
 fn show_highscore(mut menu: Query<&mut Visibility, With<HighscoreUi>>) {
     let mut menu = menu.single_mut();
     *menu = Visibility::Visible;
 }
 
+/// using Visibility to show/hide UI elements
 fn hide_highscore(mut menu: Query<&mut Visibility, With<HighscoreUi>>) {
     let mut menu = menu.single_mut();
     *menu = Visibility::Hidden;
 }
 
+/// spawns a MaterialMeshBundel, a camera, two light sources and the background music
 fn setup_system(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -226,6 +256,7 @@ fn setup_system(
     ));
 }
 
+/// spawns spaceship and maus sprite (and 2d camera)
 fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         SceneBundle {
@@ -294,19 +325,22 @@ fn setup_ship_and_maus(mut commands: Commands, asset_server: Res<AssetServer>) {
     spawn_schnecke(commands, asset_server, schnecke_pos);
 }
 
+/// spawns the img button
 fn spawn_button(commands: Commands, asset_server: Res<AssetServer>) {
     make_button(commands, asset_server);
 }
 
+/// spawns the Scoreboard UI
 fn spawn_scoreboard(commands: Commands) {
     make_scoreboard(commands);
 }
 
+/// spawns the Highscore UI
 fn spawn_highscore(commands: Commands) {
     make_highscore(commands);
 }
 
-//spanw Schnecken-Emitter (runs on state change):
+/// spawn Schnecken-Emitter (runs on state change [crate::gamestate::SchneckenEmitterState]):
 fn spawn_schnecke_emitter(
     commands: Commands,
     asset_server: Res<AssetServer>,
@@ -317,6 +351,7 @@ fn spawn_schnecke_emitter(
 
 //SYSTEMS:
 
+/// system to move the Schnecke from left to right
 fn move_schnecke(mut query: Query<&mut Transform, With<Schnecke>>, time: Res<Time>) {
     let speed = 90.0;
     let window_width = 650.0;
@@ -333,6 +368,7 @@ fn move_schnecke(mut query: Query<&mut Transform, With<Schnecke>>, time: Res<Tim
     }
 }
 
+/// using the MyTimer Resource to animate the button
 fn button_timer_system(
     mut query: Query<&mut Transform, With<UiImage>>,
     time: Res<Time>,
@@ -348,12 +384,16 @@ fn button_timer_system(
     }
 }
 
+/// system to change the scale of the cube
 fn my_funny_system(mut query: Query<&mut Transform, With<Cubie>>) {
     for mut transform in query.iter_mut() {
         transform.scale = Vec3::new(1.0, 2.0, 1.0);
     }
 }
 
+/// system to change the color of the mouse every 2 seconds
+/// 
+/// see run condition on App.add_systems(): `color_change_system.run_if(on_timer(std::time::Duration::from_secs(2)))``
 fn color_change_system(mut query: Query<&mut Sprite, With<Mausi>>) {
     for mut sprite in query.iter_mut() {
         let random_color = Color::rgb(
@@ -365,6 +405,7 @@ fn color_change_system(mut query: Query<&mut Sprite, With<Mausi>>) {
     }
 }
 
+/// using the speed set in the [Rotator]
 fn rotate_system(
     time: Res<Time>,
     mut query: Query<(&Rotator, &mut Transform), Without<Spaceship>>,
@@ -376,6 +417,7 @@ fn rotate_system(
     }
 }
 
+/// using the speed set in the [Rotator]
 fn rotate_system_flugi(
     time: Res<Time>,
     mut query: Query<(&Rotator, &mut Transform), With<Spaceship>>,
@@ -390,6 +432,7 @@ fn rotate_system_flugi(
     }
 }
 
+/// listening for colision events porvided by rapier2d
 fn listen_for_collision_events(
     //CollisionEvent comes from rapier2d (Alternative könnte bevy_xpbd_2d sein)
     mut collision_events: EventReader<CollisionEvent>,
@@ -429,11 +472,13 @@ fn listen_for_collision_events(
     }
 }
 
+/// # system that constantly sets the Scoreboard UIs text section to the score value of the Scoreboard Resource
 fn update_scoreboard(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text, With<ScoreboardUi>>) {
     let mut text = query.single_mut();
     text.sections[1].value = scoreboard.score.to_string();
 }
 
+/// system that initiates the highscore display
 fn init_highscore_holder(
     scoreboard: Res<Scoreboard>,
     mut query: Query<&mut Text, With<HighscoreUi>>,
@@ -442,6 +487,9 @@ fn init_highscore_holder(
     text.sections[3].value = scoreboard.highscore_holder.clone();
 }
 
+/// system that updates the highscore in the Scoreboard Resource and on the Database
+/// 
+/// [crate::controls::UpdateDataEvent] is used to trigger the database update in `db.rs``
 fn update_highscore(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut scoreboard: ResMut<Scoreboard>,
@@ -469,6 +517,9 @@ fn update_highscore(
     }
 }
 
+/// # system that checks for the "winning state" which is a score equalt to 3
+/// 
+/// on winning state the state [crate::gamestate::SchneckenEmitterState] triggers the spawn of the particle emitter
 fn check_score_changed(
     my_res: Res<Scoreboard>,
     mut next_state: ResMut<NextState<SchneckenEmitterState>>,
@@ -499,12 +550,16 @@ fn check_score_changed(
 //     }
 // }
 
+/// system that stops the emitter (using OnExit schedule)
+/// 
+/// # see App setting: `.add_systems(OnExit(SchneckenEmitterState::Emitting), destroy_emitter)`
 fn destroy_emitter(mut commands: Commands, query: Query<Entity, With<ParticleEmitter>>) {
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }
 }
 
+/// system that toggles the music to be playing or pause (uses pattern matching)
 fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic>>) {
     // pattern matching on Result<T, E>
     if let Ok(sink) = music_controller.get_single() {
@@ -512,6 +567,7 @@ fn pause_music_toggle(music_controller: Query<&AudioSink, With<MyBackgroundMusic
     }
 }
 
+/// system that initiallises the Menu variant of the GameState ([crate::gamestate::GameState])
 fn init_state_for_camera(mut next_state: ResMut<NextState<GameState>>) {
     next_state.set(GameState::Menu);
 }

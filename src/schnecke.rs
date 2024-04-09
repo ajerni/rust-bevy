@@ -1,9 +1,14 @@
+//! Function to spawn a "Schnecke" entity
+
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
+/// Marker struct for the "Schnecke" entity
 pub struct Schnecke;
 
+/// spawn a "Schnecke" entity
+/// also adds the `RigidBody`, `Collider`, `ActiveEvents` and `Sensor` components for collision detection
 pub fn spawn_schnecke(mut commands: Commands, asset_server: Res<AssetServer>, pos: Vec3) {
     commands.spawn((
         RigidBody::Fixed,

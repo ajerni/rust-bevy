@@ -1,3 +1,5 @@
+//! A button (simple png image) with an event listener and a callback function
+
 use bevy::prelude::*;
 use bevy_mod_picking::events::{Click, Pointer};
 use bevy_mod_picking::prelude::On;
@@ -5,6 +7,7 @@ use bevy_mod_picking::prelude::On;
 use crate::schnecke::*;
 use crate::timers::MyTimer;
 
+/// Spawns a button that can be clicked.
 pub fn make_button(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((ImageBundle {
@@ -25,6 +28,7 @@ pub fn make_button(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(On::<Pointer<Click>>::run(button_callback_click));
 }
 
+/// Callback for the button click event. Resets/Triggers a timer for animation
 fn button_callback_click(
     mut query: Query<&mut Transform, With<UiImage>>,
     mut timer: ResMut<MyTimer>,

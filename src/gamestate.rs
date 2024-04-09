@@ -1,8 +1,12 @@
+//! States used to stear the games flow (which systems to run on which states)
 use bevy::prelude::*;
 
 //starting in Playing here to get initial camera
 
 #[derive(States, Clone, Copy, Default, Eq, PartialEq, Hash, Debug)]
+/// The current state of the game.
+/// # See further docs inside the code on how to use these States
+/// This is used to control which systems are executed.
 pub enum GameState {
     #[default]
     Playing,
@@ -11,6 +15,7 @@ pub enum GameState {
 }
 
 #[derive(States, Clone, Copy, Default, Eq, PartialEq, Hash, Debug)]
+/// This State is used to trigger if Emitter is emitting or not
 pub enum SchneckenEmitterState {
     #[default]
     NotEmitting,

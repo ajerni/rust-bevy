@@ -1,8 +1,11 @@
+//! Plugin for the fly system of the spaceship.
+
 use crate::controls::Spaceship;
 use crate::gamestate::GameState;
 
 use bevy::prelude::*;
 
+/// # Basic Bevy stuff --> Transform = translate (position) & rotation & scale
 pub struct FlyPlugin;
 
 impl Plugin for FlyPlugin {

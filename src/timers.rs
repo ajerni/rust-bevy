@@ -1,6 +1,8 @@
+//! Timer used for button animation
 use bevy::prelude::*;
 
 #[derive(Resource)]
+/// Resource for the timer that is used in `button.rs` and `fn button_timer_system` in `main.rs`
 pub struct MyTimer(pub Timer);
 
 impl MyTimer {

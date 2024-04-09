@@ -1,9 +1,12 @@
+//! Particle Emitter
+
 use bevy::prelude::*;
 use bevy_enoki::prelude::*;
 
 #[derive(Component, Debug)]
 pub struct ParticleEmitter;
 
+/// Emitter is triggerde by this Event: [crate::gamestate::SchneckenEmitterState]
 pub fn emit_particle(
     mut cmd: Commands,
     mut materials: ResMut<Assets<SpriteParticle2dMaterial>>,

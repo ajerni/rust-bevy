@@ -1,3 +1,5 @@
+//! Databas logic to load and save the highscore data
+
 use bevy::prelude::*;
 use bevy_http_client::*;
 
@@ -5,19 +7,29 @@ use crate::{controls::GetDataEvent, Scoreboard, UpdateDataEvent};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
+/// Database structure used to save highscore data
+/// # Only metadata.tags (see [Metadata]) used for name and score values
+/// see [SQLX DB](https://github.com/ajerni/rust-sqlx)
 struct Book {
     pub isbn: String,
     pub title: String,
     pub author: String,
+    /// Database structure used to save highscore data
+    /// see [SQLX DB](https://github.com/ajerni/rust-sqlx)
     pub metadata: Option<Metadata>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 struct Metadata {
     pub avg_review: f32,
+    /// Database structure used to save highscore data
+    /// see [SQLX DB](https://github.com/ajerni/rust-sqlx)
     pub tags: Vec<String>,
 }
 
+/// Plugin to handle database operations (loading and saving highscore data)
+/// Works with the Events: [crate::controls::GetDataEvent] and [crate::controls::UpdateDataEvent]
+/// see [SQLX DB](https://github.com/ajerni/rust-sqlx)
 pub struct DataPlugin;
 
 impl Plugin for DataPlugin {

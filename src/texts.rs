@@ -1,8 +1,9 @@
+//! Plugin for explanation text (also containing a system to change color on pause state)
 use bevy::prelude::*;
 
 use crate::GameState;
-//use crate::controls::MyLastLoadEvent;
 
+/// Marker struct for text
 pub struct MyTextPlugin;
 
 #[derive(Component)]
@@ -42,11 +43,13 @@ fn write_text_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
+/// checks active state and changes color of text accordingly
 fn change_text_color_on_paused(
     state: Res<State<GameState>>,
     mut query: Query<&mut Text, With<InsturctionText>>,
 ) {
     for mut text in query.iter_mut() {
+        // checks active state
         if state.get() == &GameState::Paused {
             text.sections[0].style.color = Color::RED;
         } else {

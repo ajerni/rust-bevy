@@ -1,7 +1,10 @@
+//! Pause plugin.
+
 use bevy::prelude::*;
 
 use crate::gamestate::GameState;
 
+/// Plugin for the pause state.
 pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
@@ -10,6 +13,8 @@ impl Plugin for PausePlugin {
     }
 }
 
+/// Changing the game state based on keyboard input.
+/// uses pattern matching over the game states.
 fn game_state_input_events(
     mut next_state: ResMut<NextState<GameState>>,
     state: Res<State<GameState>>,

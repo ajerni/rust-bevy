@@ -1,3 +1,4 @@
+//! Displays the score and highscore
 use bevy::prelude::*;
 
 #[derive(Resource, Default, Debug)]
@@ -9,9 +10,11 @@ pub struct Scoreboard {
 }
 
 #[derive(Component, Debug)]
+/// Marker struct for Scoereboard
 pub struct ScoreboardUi;
 
 #[derive(Component, Debug)]
+/// Marker struct for Highscore
 pub struct HighscoreUi;
 
 const SCOREBOARD_FONT_SIZE: f32 = 40.0;
@@ -19,6 +22,7 @@ const SCOREBOARD_TEXT_PADDING: Val = Val::Px(10.0);
 const TEXT_COLOR: Color = Color::rgb(0.5, 0.5, 1.0);
 const SCORE_COLOR: Color = Color::rgb(1.0, 0.5, 0.5);
 
+/// Displays the score
 pub fn make_scoreboard(mut commands: Commands) {
     commands.spawn((
         ScoreboardUi,
@@ -46,6 +50,7 @@ pub fn make_scoreboard(mut commands: Commands) {
     ));
 }
 
+/// Displays the highscore
 pub fn make_highscore(mut commands: Commands) {
     commands.spawn((
         HighscoreUi,

@@ -1,3 +1,5 @@
+//! Plugin that adds the Main Menu (as an overlay with background color)
+
 use bevy::prelude::*;
 use bevy_simple_text_input::{TextInputBundle, TextInputPlugin, TextInputSubmitEvent};
 
@@ -9,6 +11,7 @@ const BORDER_COLOR_ACTIVE: Color = Color::rgb(0.75, 0.52, 0.99);
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 const BACKGROUND_COLOR: Color = Color::rgb(0.15, 0.15, 0.15);
 
+/// Marker struct for UI / Main Menu
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
@@ -37,6 +40,9 @@ fn hide_menu(mut menu: Query<&mut Visibility, With<MainMenu>>) {
     *menu = Visibility::Hidden;
 }
 
+/// spawning the main menues TextBundles and TextInputBundle
+/// 
+/// Tree of NoteBundles with children
 pub fn main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((

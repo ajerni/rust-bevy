@@ -1,22 +1,25 @@
+//! Definition of marker structs (Components), Resources and Events
 use bevy::prelude::*;
 
 // COMPONENTS
 
 #[derive(Component, Debug)]
+/// Marker struct for the Cube which has a Mesh and a Material
 pub struct Cubie;
 
-// #[derive(Component, Debug)]
-// pub struct Schnecke;
-
 #[derive(Component, Debug)]
+/// Marker struct for the 3d spaceship which is a glb model
 pub struct Spaceship;
 
 #[derive(Component, Debug)]
+/// Marker struct for the Maus which is a SpriteBundle (with texture)
 pub struct Mausi;
 
 // RESOURCES
 
 #[derive(Resource, Default)]
+/// Resource for the animation state of the Spaceship
+/// Used in systems: `fn click_detect_system` (see [ClickDetectorPlugin]) and `fn rotate_system_flugi`
 pub struct AnimationStateResource {
     pub moving: bool,
 }
@@ -24,9 +27,13 @@ pub struct AnimationStateResource {
 // EVENTS
 
 #[derive(Event, Default, Debug)]
+/// Event used to read highscore date from the database
+/// Used in `db.rs` and system `fn setup_system`
 pub struct GetDataEvent;
 
 #[derive(Event, Default, Debug)]
+/// Event used to save highscore date to the database
+/// Used in `db.rs`and system `fn update_highscore``
 pub struct UpdateDataEvent;
 
 // #[derive(Event, Default, Debug)]
@@ -37,6 +44,7 @@ pub struct UpdateDataEvent;
 
 // PLUGINS
 
+/// Plugin for the mouse click detection system (see [AnimationStateResource])
 pub struct ClickDetectorPlugin;
 
 impl Plugin for ClickDetectorPlugin {
