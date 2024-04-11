@@ -21,3 +21,7 @@ https://bevy.andierni.ch
 ## Documentation:
 
 https://bevy.andierni.ch/doc/shapetest/index.html
+
+## HTMX Frontend to update the highscore data:
+
+https://rust-sqlx.onrender.com/htmx and https://htmx.andierni.ch
